@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Music Library</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(45deg, #1e1e1e, #2d2d2d);
+            color: #ffffff;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: rgba(0, 0, 0, 0.5);
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 20px;
+            border-bottom: 1px solid #404040;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            color: #1DB954;
+            margin-bottom: 10px;
+        }
+
+        .playlist {
+            list-style: none;
+        }
+
+        .song {
+            display: flex;
+            align-items: center;
+            padding: 15px;
+            margin: 10px 0;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .song:hover {
+            background: rgba(255, 255, 255, 0.1);
+            transform: translateX(10px);
+        }
+
+        .song.playing {
+            background: rgba(29, 185, 84, 0.1);
+            border-left: 4px solid #1DB954;
+        }
+
+        .song-info {
+            flex-grow: 1;
+            margin-left: 15px;
+        }
+
+        .song-title {
+            font-size: 1.1em;
+            margin-bottom: 5px;
+        }
+
+        .song-duration {
+            font-size: 0.9em;
+            color: #888;
+        }
+
+        .controls {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: rgba(18, 18, 18, 0.95);
+            padding: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 20px;
+        }
+
+        .control-btn {
+            background: none;
+            border: none;
+            color: #fff;
+            cursor: pointer;
+            font-size: 1.2em;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
+
+        .control-btn:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .play-btn {
+            background: #1DB954;
+            font-size: 1.5em;
+        }
+
+        .play-btn:hover {
+            background: #1ed760;
+            transform: scale(1.1);
+        }
+
+        .progress-container {
+            width: 60%;
+            height: 5px;
+            background: #404040;
+            border-radius: 3px;
+            cursor: pointer;
+        }
+
+        .progress-bar {
+            width: 0%;
+            height: 100%;
+            background: #1DB954;
+            border-radius: 3px;
+            transition: width 0.1s linear;
+        }
+
+        .time-info {
+            color: #888;
+            font-size: 0.9em;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Music Library</h1>
+            <p>Your Personal Collection</p>
+        </div>
+
+        <ul class="playlist">
+            <li class="song" data-src="Creating Dreams.mp3">
+                <i class="fas fa-music"></i>
+                <div class="song-info">
+                    <div class="song-title">Creating Dreams</div>
+                    <div class="song-duration">0:00</div>
+                </div>
+            </li>
+            <li class="song" data-src="Haunted Blocks.mp3">
+                <i class="fas fa-music"></i>
+                <div class="song-info">
+                    <div class="song-title">Haunted Blocks</div>
+                    <div class="song-duration">0:00</div>
+                </div>
+            </li>
+            <li class="song" data-src="Black Battle.mp3">
+                <i class="fas fa-music"></i>
+                <div class="song-info">
+                    <div class="song-title">Black Battle</div>
+                    <div class="song-duration">0:00</div>
+                </div>
+            </li>
+            <li class="song" data-src="Patna nights.mp3">
+                <i class="fas fa-music"></i>
+                <div class="song-info">
+                    <div class="song-title">Patna Nights</div>
+                    <div class="song-duration">0:00</div>
+                </div>
+            </li>
+        </ul>
+    </div>
+
+    <div class="controls">
+        <button class="control-btn" id="prev-btn">
+            <i class="fas fa-backward"></i>
+        </button>
+        <button class="control-btn play-btn" id="play-btn">
+            <i class="fas fa-play"></i>
+        </button>
+        <button class="control-btn" id="next-btn">
+            <i class="fas fa-forward"></i>
+        </button>
+        <div class="time-info" id="current-time">0:00</div>
+        <div class="progress-container" id="progress-container">
+            <div class="progress-bar" id="progress-bar"></div>
+        </div>
+        <div class="time-info" id="duration">0:00</div>
+    </div>
+
+    <script>
+        const audio = new Audio();
+        const playlist = document.querySelectorAll('.song');
+        const playBtn = document.getElementById('play-btn');
+        const prevBtn = document.getElementById('prev-btn');
+        const nextBtn = document.getElementById('next-btn');
+        const progressBar = document.getElementById('progress-bar');
+        const progressContainer = document.getElementById('progress-container');
+        const currentTimeEl = document.getElementById('current-time');
+        const durationEl = document.getElementById('duration');
+
+        let currentSongIndex = 0;
+        let isPlaying = false;
+
+        // Load first song
+        loadSong(playlist[0]);
+
+        function loadSong(songElement) {
+            const songSrc = songElement.dataset.src;
+            audio.src = songSrc;
+            
+            // Remove playing class from all songs
+            playlist.forEach(song => song.classList.remove('playing'));
+            // Add playing class to current song
+            songElement.classList.add('playing');
+        }
+
+        function playSong() {
+            isPlaying = true;
+            playBtn.innerHTML = '<i class="fas fa-pause"></i>';
+            audio.play();
+        }
+
+        function pauseSong() {
+            isPlaying = false;
+            playBtn.innerHTML = '<i class="fas fa-play"></i>';
+            audio.pause();
+        }
+
+        function prevSong() {
+            currentSongIndex--;
+            if (currentSongIndex < 0) {
+                currentSongIndex = playlist.length - 1;
+            }
+            loadSong(playlist[currentSongIndex]);
+            if (isPlaying) playSong();
+        }
+
+        function nextSong() {
+            currentSongIndex++;
+            if (currentSongIndex >= playlist.length) {
+                currentSongIndex = 0;
+            }
+            loadSong(playlist[currentSongIndex]);
+            if (isPlaying) playSong();
+        }
+
+        function updateProgress(e) {
+            const { duration, currentTime } = e.srcElement;
+            const progressPercent = (currentTime / duration) * 100;
+            progressBar.style.width = `${progressPercent}%`;
+
+            // Update time displays
+            const durationMinutes = Math.floor(duration / 60);
+            const durationSeconds = Math.floor(duration % 60);
+            const currentMinutes = Math.floor(currentTime / 60);
+            const currentSeconds = Math.floor(currentTime % 60);
+
+            durationEl.textContent = `${durationMinutes}:${durationSeconds.toString().padStart(2, '0')}`;
+            currentTimeEl.textContent = `${currentMinutes}:${currentSeconds.toString().padStart(2, '0')}`;
+        }
+
+        function setProgress(e) {
+            const width = this.clientWidth;
+            const clickX = e.offsetX;
+            const duration = audio.duration;
+            audio.currentTime = (clickX / width) * duration;
+        }
+
+        // Event Listeners
+        playBtn.addEventListener('click', () => {
+            isPlaying ? pauseSong() : playSong();
+        });
+
+        prevBtn.addEventListener('click', prevSong);
+        nextBtn.addEventListener('click', nextSong);
+
+        audio.addEventListener('timeupdate', updateProgress);
+        progressContainer.addEventListener('click', setProgress);
+
+        audio.addEventListener('ended', nextSong);
+
+        // Make playlist items clickable
+        playlist.forEach((song, index) => {
+            song.addEventListener('click', () => {
+                currentSongIndex = index;
+                loadSong(song);
+                playSong();
+            });
+        });
+    </script>
+</body>
+</html>
